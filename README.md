@@ -1,5 +1,1 @@
-Hi Everyone, 
-
-This directory serves to contain all the project tools that i am currently working on. 
-
-Thanks
+This directory contains all the home-made Network Tools. 
