@@ -71,13 +71,13 @@ conn.close()
 BGP withdraw:
 #############
 
-update={'TYPE':1,'NLRI':[(mask,'prefix')],'PEER':'ip'}
+update={'TYPE':1,'NLRI':[(32,'1.1.1.1')]}
 
 ##############
 BGP PA update:
 ##############
 
-update={'TYPE':0,'ORIGIN':'\x00','NEXT_HOP':'\xc0\xa8\x08\xc8','MULTI_EXIT_DISC':'\x00\x00\x00\x00','LOCAL_PREF':'\x00\x00\x00\x96','NLRI':[(32, '1.1.1.1')],'AS_PATH':'','PEER':'ip'}
+update={'TYPE':0,'ORIGIN':'\x00','NEXT_HOP':'\xc0\xa8\x08k','MULTI_EXIT_DISC':'\x00\x00\x00\x00','LOCAL_PREF':'\x00\x00\x00\x96','NLRI':[(32, '1.1.1.1')],'AS_PATH':''}
 
 ##########
  Packet
