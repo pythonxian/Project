@@ -16,7 +16,7 @@ next_hop = raw_input("Please Enter the Next Hop IP address :")
 next_hop = next_hop.split('.')
 
 as_path = [chr(int(pst)),chr(int(psl))]
-#med_loc=[]
+
 
 def binsplit(s):
 	
@@ -39,7 +39,7 @@ def AS_convert(psv, as_path):
 
 def LOC_MED_convert(num):
 	med_loc=[]
-	for i in binsplit(bin(int(med))[2:].zfill(32)):
+	for i in binsplit(bin(int(mum))[2:].zfill(32)):
 		med_loc.append(chr(int(i,2)))
 	return med_loc
 
