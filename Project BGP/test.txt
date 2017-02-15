@@ -1,1 +1,155 @@
 
+###################################################################
+ Sample Deployment - Router Configuration
+###################################################################
+**************
+Internal Edge:
+**************
+interface Loopback0
+ ip address 4.4.4.4 255.255.255.255
+!
+interface FastEthernet0/0
+ ip address 10.1.34.4 255.255.255.0
+ speed 100
+ full-duplex
+!
+interface FastEthernet0/1
+ ip address 192.168.8.200 255.255.255.0
+ duplex auto
+ speed auto
+!
+router ospf 65000
+ router-id 4.4.4.4
+ log-adjacency-changes
+ network 4.4.4.4 0.0.0.0 area 0
+ network 10.1.34.0 0.0.0.255 area 0
+!
+router bgp 65000
+ no synchronization
+ bgp router-id 4.4.4.4
+ bgp log-neighbor-changes
+ network 192.168.8.0
+ neighbor 10.1.34.3 remote-as 65000
+ no auto-summary
+**************
+RR:
+**************
+interface Loopback0
+ ip address 3.3.3.3 255.255.255.255
+!
+interface FastEthernet0/0
+ ip address 10.1.13.3 255.255.255.0
+ duplex full
+!
+interface FastEthernet1/0
+ ip address 10.1.23.3 255.255.255.0
+ speed auto
+ duplex full
+!
+interface FastEthernet1/1
+ ip address 10.1.34.3 255.255.255.0
+ speed auto
+ duplex full
+!
+router ospf 65000
+ router-id 3.3.3.3
+ redistribute connected
+ network 3.3.3.3 0.0.0.0 area 0
+ network 0.0.0.0 255.255.255.255 area 0
+!
+router bgp 65000
+ bgp router-id 3.3.3.3
+ bgp cluster-id 3.3.3.3
+ bgp log-neighbor-changes
+ neighbor isp peer-group
+ neighbor isp remote-as 65000
+ neighbor isp route-reflector-client
+ neighbor 1.1.1.1 peer-group isp
+ neighbor 2.2.2.2 peer-group isp
+ neighbor 4.4.4.4 remote-as 65000
+ neighbor 4.4.4.4 route-reflector-client
+ neighbor 192.168.8.107 remote-as 65000
+ neighbor 192.168.8.107 update-source Loopback0
+ neighbor 192.168.8.107 route-reflector-client
+**************
+DC North:
+**************
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+!
+interface Loopback1
+ description App VIP
+ ip address 22.22.22.2 255.255.255.0
+!
+interface Loopback2
+ description Server Data
+ ip address 172.16.13.1 255.255.255.0
+ ip ospf 65000 area 0
+!
+interface FastEthernet0/0
+ ip address 10.1.13.1 255.255.255.0
+ duplex full
+!
+interface FastEthernet1/0
+ no ip address
+ shutdown
+ speed auto
+ duplex auto
+!
+interface FastEthernet1/1
+ no ip address
+ shutdown
+ speed auto
+ duplex auto
+!
+router ospf 65000
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.1.13.0 0.0.0.255 area 0
+!
+router bgp 65000
+ bgp router-id 1.1.1.1
+ bgp log-neighbor-changes
+ neighbor 10.1.13.3 remote-as 65000
+ neighbor 10.1.13.3 default-originate route-map default-out
+**************
+DC South:
+**************
+interface Loopback0
+ ip address 2.2.2.2 255.255.255.255
+!
+interface Loopback1
+ description App VIP 
+ ip address 22.22.22.2 255.255.255.0
+!
+interface Loopback2
+ description Server Data
+ ip address 172.16.22.2 255.255.255.0
+ ip ospf 65000 area 0
+!
+interface FastEthernet0/0
+ no ip address
+ shutdown
+ duplex full
+!
+interface FastEthernet1/0
+ ip address 10.1.23.2 255.255.255.0
+ speed auto
+ duplex auto
+!
+interface FastEthernet1/1
+ no ip address
+ shutdown
+ speed auto
+ duplex auto
+!
+router ospf 65000
+ router-id 2.2.2.2
+ network 2.2.2.2 0.0.0.0 area 0
+ network 10.1.23.0 0.0.0.255 area 0
+!
+router bgp 65000
+ bgp router-id 2.2.2.2
+ bgp log-neighbor-changes
+ neighbor 10.1.23.3 remote-as 65000
+ neighbor 10.1.23.3 default-originate route-map default-out
