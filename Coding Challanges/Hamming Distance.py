@@ -1,6 +1,6 @@
 '''
 #############
-  Challange
+  Challenge
 #############
 The Hamming distance between two integers is the number of positions at which the corresponding bits are different.
 
@@ -34,12 +34,12 @@ As shown from the example, we need to count the total number of different positi
       
 By observing the given example, noticing that the first bit on the right and  the third bit on the left are different. If we could tell the code to count them, then our job would be done. So how do we do that in python? The answer is the Bitwise Operator. with 1^0 = 1, all we need is to count how many 1 post the operation on the given integer.  
 
-'''
+
 
 #####################
  Translated Solution
 #####################
-
+'''
 class Solution(object):
     def hammingDistance(self, x, y):
         """
