@@ -3,29 +3,28 @@
 #############
   Challenge
 #############
-Given a non-empty string check if it can be constructed by taking a substring of it and appending multiple copies of the substring together. 
+Given a string s and a non-empty string p, find all the start indices of p's anagrams in s.
 
-Input: "abcabcabcabc"
+Strings consists of lowercase English letters only and the length of both strings s and p will not be larger than 20,100.
 
-Output: True
+The order of output does not matter.
 
-Explanation: It's the substring "abc" four times. (And the substring "abcabc" twice.)
+Input:
+s: "cbaebabacd" p: "abc"
 
+Output:
+[0, 6]
 
+Explanation:
+The substring with start index = 0 is "cba", which is an anagram of "abc".
+The substring with start index = 6 is "bac", which is an anagram of "abc".
 
 #############
   Thoughts
 #############
 
-I can't think of any except for Brute Force/Exhaustive Search meaning trying all the combination of the element while enumerating 
-the list. I dont think this is a good approach. Then again, i asked my friend Google. he gave me a very smart solution and also a
-lesson learned for me. 
-
-"Consider a string S="helloworld". Now, given another string T="lloworldhe", can we figure out if T is a rotated version of S? Yes, we can! We check if S is a substring of T+T.
-
-Fine. How do we apply that to this problem? We consider every rotation of string S such that it's rotated by k units [k < len(S)] to the left. Specifically, we're looking at strings "elloworldh", "lloworldhe", "loworldhel", etc...
-
-If we have a string that is periodic (i.e. is made up of strings that are the same and repeat R times), then we can check if the string is equal to some rotation of itself, and if it is, then we know that the string is periodic. Checking if S is a sub-string of (S+S)[1:-1] basically checks if the string is present in a rotation of itself for all values of R such that 0 < R < len(S)."
+The given non-empty string is like a window of element you would like to match against the string s. Sliding window matching
+is the solution for this task. Starting from the left of the string s till end. 
 
 
 #####################
@@ -33,14 +32,16 @@ If we have a string that is periodic (i.e. is made up of strings that are the sa
 #####################
 '''
 	
-def repeatedSubstringPattern(self, str):
+class Solution(object):
+    def findAnagrams(self, s, p):
+        """
+        :type s: str
+        :type p: str
+        :rtype: List[int]
+        """
+        output = []
+        for i in range(len(p)-1, len(s)):
+            if sorted(s[i-len(p)+1]:i+1) == sorted(p):
+                output.append(i-len(p)+1)
 
-        """
-        :type str: str
-        :rtype: bool
-        """
-        if not str:
-            return False
-            
-        ss = (str + str)[1:-1]
-        return ss.find(str) != -1
+        return output
