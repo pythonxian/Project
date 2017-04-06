@@ -1,0 +1,74 @@
+import socket
+import time
+from scapy.all import *
+from ospf_module import *
+
+elec=0
+dbl=0
+
+
+def p_display(pkt):
+
+	global elec
+	global dbl
+
+	#OSPF Two Way State:
+	if pkt[IP].src == '192.168.8.201'and pkt[OSPF_Hdr].type == 1:
+		send(IP(dst=pkt[IP].src)/OSPF_Hdr(src='7.7.7.7', seq=None, area='0.0.0.0', len=None, version=2, chksum=None, type=1)/OSPF_Hello(neighbors=pkt[OSPF_Hdr].src, hellointerval=10, prio=1, mask='255.255.255.0', deadinterval=40, router='0.0.0.0', backup='0.0.0.0', options=int(pkt[OSPF_Hello].options)-16))
+		return "Hello Sent"
+
+	#OSPF DR Election, ExStart and Exchange States:
+	elif pkt[IP].src == '192.168.8.201'and pkt[OSPF_Hdr].type == 2:
+		if pkt[OSPF_DBDesc].dbdescr == 7:
+			if elec == 0:
+				send(IP(dst=pkt[IP].src)/OSPF_Hdr(src='7.7.7.7', seq=None, area='0.0.0.0', type=2, len=None, version=2, chksum=None)/OSPF_DBDesc(lsaheaders=[], ddseq=7, options=int(pkt[OSPF_DBDesc].options)-16, dbdescr=7, mtu=1500))
+				elec=1
+				return ""
+			else:
+				return ""
+
+		elif pkt[OSPF_DBDesc].dbdescr == 2:
+			send(IP(dst=pkt[IP].src)/OSPF_Hdr(src='7.7.7.7', seq=None, area='0.0.0.0', len=None, version=2, chksum=None, type=2)/OSPF_DBDesc(lsaheaders=[OSPF_LSA_Hdr(adrouter='7.7.7.7', id='7.7.7.7', options=34L, chksum=None)], ddseq=pkt[OSPF_DBDesc].ddseq + 1, options=int(pkt[OSPF_DBDesc].options)-16, dbdescr=3, mtu=1500))
+
+			return "DB LSA Header sent"
+
+		elif pkt[OSPF_DBDesc].dbdescr == 0:
+			if dbl == 0:
+			#DB ACK
+				send(IP(dst=pkt[IP].src)/OSPF_Hdr(src='7.7.7.7', seq=None, area='0.0.0.0', type=2, authtype=0, len=None, version=2, chksum=None, authdatalen=None)/OSPF_DBDesc(lsaheaders=[], ddseq=pkt[OSPF_DBDesc].ddseq + 1, options=int(pkt[OSPF_DBDesc].options)-16, dbdescr=1, mtu=1500))
+
+			#OSPF Request
+				send(IP(dst=pkt[IP].src)/OSPF_Hdr(src='7.7.7.7', seq=None, area='0.0.0.0', len=None, version=2, chksum=None, type=3)/OSPF_LSReq(requests=[OSPF_LSReq_Item(adrouter=pkt[OSPF_Hdr].src, type=1, id=pkt[OSPF_Hdr].src)]))
+				time.sleep(1)
+				dbl=1
+			else:
+				return ""
+
+	#OSPF Loading State - LSA Request
+	elif pkt[IP].src == '192.168.8.201'and pkt[OSPF_Hdr].type == 3:
+		send(IP(dst=pkt[IP].src)/OSPF_Hdr(src='7.7.7.7', seq=None, area='0.0.0.0', type=4, len=None, version=2, chksum=None)/OSPF_LSUpd(lsacount=1, lsalist=[OSPF_Router_LSA(reserved=0, linkcount=1, age=1, len=None, id='7.7.7.7', linklist=[OSPF_Link(type=2, metric=50, data='192.168.8.201', id='192.168.8.201', toscount=0)], flags=0L, chksum=None, adrouter='7.7.7.7', type=1, options=34L)]))
+		return "update sent"
+
+	#OSPF Loading State - LSA Update
+	elif pkt[IP].src == '192.168.8.201'and pkt[OSPF_Hdr].type == 4:
+		ack=[]
+		for i in pkt[OSPF_Hdr].lsalist:
+			ack.append(OSPF_LSA_Hdr(adrouter=i.adrouter, seq=i.seq, age=i.age, len=i.len, id=i.id, chksum=i.chksum, type=i.type, options=i.options))
+		
+		send(IP(dst=pkt[IP].src)/OSPF_Hdr(src='7.7.7.7', seq=None, area='0.0.0.0', authdatalen=None, len=None, version=2, chksum=None, type=5)/OSPF_LSAck(lsaheaders = ack))
+		return "Update ACK sent"
+
+	else:
+		return ""
+
+
+sniff(filter='ip and host 192.168.8.201', store=0, prn=p_display)
+
+#######################################
+#   Assumption
+#######################################
+'''
+
+This script applys only to a non-cryptographic authentication OSPF adjacency as link-local signaling (LLS) option bit is not set on Hello, DB and LSA packets. 
+
+'''
