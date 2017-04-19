@@ -59,10 +59,3 @@ def repeatedSubstringPattern(self, str):
             
         ss = (str + str)[1:-1]
         return ss.find(str) != -1
-        """
-        output = []
-        for i in range(len(p)-1, len(s)):
-            if sorted(s[i-len(p)+1]:i+1) == sorted(p):
-                output.append(i-len(p)+1)
-
-        return output
